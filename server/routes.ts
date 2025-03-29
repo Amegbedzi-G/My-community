@@ -834,24 +834,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add a catch-all route to handle client-side routing for deployment
-  app.get('*', (req, res, next) => {
-    // Handle API requests normally
-    if (req.url.startsWith('/api')) {
-      return next();
-    }
-    
-    // Check if request is for client application
-    if (req.url.startsWith('/client')) {
-      // Let Vite handle it
-      return next();
-    }
-    
-    // Serve the root index.html for all other routes
-    // This helps with client-side routing and deployment
-    res.sendFile('index.html', { root: '.' });
-  });
-
   const httpServer = createServer(app);
   return httpServer;
 }
