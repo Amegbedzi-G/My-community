@@ -13,8 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/ThemeToggle";
+import { Textarea } from "@/components/ui/textarea";
 import {
   User,
   KeyIcon,
@@ -27,6 +36,7 @@ import {
   SunIcon,
   UserIcon,
   PencilIcon,
+  CheckIcon,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -38,6 +48,10 @@ export default function SettingsPage() {
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || "");
+  
+  // Verification dialog states
+  const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
+  const [verificationReason, setVerificationReason] = useState("");
   
   // Notification settings states
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -90,6 +104,45 @@ export default function SettingsPage() {
   
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+  
+  // Create verification request mutation
+  const createVerificationRequestMutation = useMutation({
+    mutationFn: async (data: { title: string; description: string; is_public: boolean }) => {
+      return apiRequest("POST", "/api/requests", data);
+    },
+    onSuccess: () => {
+      setVerificationDialogOpen(false);
+      setVerificationReason("");
+      toast({
+        title: "Verification request sent",
+        description: "Your verification request has been submitted and will be reviewed by an admin.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Request failed",
+        description: error.message || "Failed to submit verification request.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  const handleSubmitVerificationRequest = () => {
+    if (!verificationReason.trim()) {
+      toast({
+        title: "Invalid request",
+        description: "Please provide a reason for verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    createVerificationRequestMutation.mutate({
+      title: "Verification Request",
+      description: verificationReason,
+      is_public: false
+    });
   };
   
   return (
@@ -367,16 +420,22 @@ export default function SettingsPage() {
                       Verify your account to access tipping and other features
                     </p>
                   </div>
-                  <Button variant="outline">
-                    {user?.is_verified ? (
-                      "Verified ✓"
-                    ) : (
-                      <>
-                        <ShieldIcon className="mr-2 h-4 w-4" />
-                        Verify Now
-                      </>
-                    )}
-                  </Button>
+                  {user?.is_verified ? (
+                    <Button variant="outline" className="text-green-600 dark:text-green-400">
+                      <CheckIcon className="mr-2 h-4 w-4" />
+                      Verified
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setVerificationDialogOpen(true);
+                      }}
+                    >
+                      <ShieldIcon className="mr-2 h-4 w-4" />
+                      Verify Now
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -429,6 +488,51 @@ export default function SettingsPage() {
       </div>
       
       <MobileNavigation />
+      
+      {/* Verification Request Dialog */}
+      <Dialog open={verificationDialogOpen} onOpenChange={setVerificationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Account Verification</DialogTitle>
+            <DialogDescription>
+              Tell us why you want to verify your account. This will help our admins process your request.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <Label htmlFor="verification-reason">Reason for Verification</Label>
+            <Textarea 
+              id="verification-reason"
+              value={verificationReason}
+              onChange={(e) => setVerificationReason(e.target.value)}
+              placeholder="Explain why you want to verify your account..."
+              className="min-h-[120px]"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setVerificationDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmitVerificationRequest}
+              disabled={createVerificationRequestMutation.isPending}
+            >
+              {createVerificationRequestMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Request"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -11,11 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Post } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import PostCard from "@/components/PostCard";
-import { Loader2, EditIcon, CheckIcon } from "lucide-react";
+import { Loader2, EditIcon, CheckIcon, BadgeCheckIcon, ShieldAlertIcon } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, isAdmin } = useAuth();
@@ -23,8 +26,13 @@ export default function ProfilePage() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState("posts");
   const [editMode, setEditMode] = useState(false);
+  
+  // User profile fields
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
+  const [role, setRole] = useState("user");
   
   const { data: profileData, isLoading: isProfileLoading } = useQuery<User>({
     queryKey: [`/api/users/${user?.id}`],
@@ -42,19 +50,49 @@ export default function ProfilePage() {
     if (profileData) {
       setName(profileData.name);
       setBio(profileData.bio || "");
+      setAvatarUrl(profileData.avatar_url || "");
+      setIsVerified(profileData.is_verified);
+      setRole(profileData.role);
     }
   }, [profileData]);
   
-  const updateProfileMutation = useMutation({
-    mutationFn: async (data: { name: string; bio: string }) => {
-      return apiRequest("PUT", `/api/users/${user?.id}`, data);
+  // Verify user mutation (admin only)
+  const verifyUserMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("PUT", `/api/verify-user/${profileData?.id}`, {});
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${profileData?.id}`] });
+      toast({
+        title: "User verified",
+        description: "The user has been verified successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Failed to verify user.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: { 
+      name: string; 
+      bio: string; 
+      avatar_url: string;
+      is_verified?: boolean;
+      role?: string;
+    }) => {
+      return apiRequest("PUT", `/api/users/${profileData?.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${profileData?.id}`] });
       setEditMode(false);
       toast({
         title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        description: "Profile has been updated successfully.",
       });
     },
     onError: (error: Error) => {
@@ -76,7 +114,19 @@ export default function ProfilePage() {
       return;
     }
     
-    updateProfileMutation.mutate({ name, bio });
+    const updateData: any = { 
+      name, 
+      bio,
+      avatar_url: avatarUrl
+    };
+    
+    // Only admins can update these fields
+    if (isAdmin) {
+      updateData.is_verified = isVerified;
+      updateData.role = role;
+    }
+    
+    updateProfileMutation.mutate(updateData);
   };
   
   if (isProfileLoading) {
@@ -133,7 +183,62 @@ export default function ProfilePage() {
                         rows={3}
                       />
                     </div>
-                    <div className="flex gap-2">
+                    <div>
+                      <label htmlFor="avatar_url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Profile Picture URL
+                      </label>
+                      <div className="flex flex-col gap-2 max-w-md">
+                        <Input
+                          id="avatar_url"
+                          value={avatarUrl}
+                          onChange={(e) => setAvatarUrl(e.target.value)}
+                          placeholder="https://example.com/avatar.jpg"
+                        />
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Enter a URL to an image (file upload coming soon)
+                        </div>
+                        {avatarUrl && (
+                          <div className="mt-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              Preview
+                            </label>
+                            <Avatar className="w-16 h-16">
+                              <AvatarImage src={avatarUrl} alt="Preview" />
+                              <AvatarFallback>{name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                            </Avatar>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <div className="space-y-4 border-t pt-4 mt-4">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="verified"
+                            checked={isVerified}
+                            onCheckedChange={setIsVerified}
+                          />
+                          <label htmlFor="verified" className="text-sm font-medium">
+                            Verified User
+                          </label>
+                        </div>
+                        <div>
+                          <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            User Role
+                          </label>
+                          <Select value={role} onValueChange={setRole}>
+                            <SelectTrigger className="max-w-md">
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex gap-2 pt-2">
                       <Button 
                         variant="default" 
                         onClick={handleSaveProfile}
@@ -153,6 +258,9 @@ export default function ProfilePage() {
                           setEditMode(false);
                           setName(profileData?.name || "");
                           setBio(profileData?.bio || "");
+                          setAvatarUrl(profileData?.avatar_url || "");
+                          setIsVerified(profileData?.is_verified || false);
+                          setRole(profileData?.role || "user");
                         }}
                       >
                         Cancel
