@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { uploadProfile, uploadPostMedia, getFileUrl } from "./upload";
 import {
   insertPostSchema, insertCommentSchema, insertLikeSchema,
   insertMessageSchema, insertTipSchema, insertPaymentRequestSchema,
@@ -12,6 +13,54 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Sets up authentication routes
   setupAuth(app);
+
+  // File upload routes
+  
+  // POST /api/upload/profile - Upload profile picture
+  app.post("/api/upload/profile", uploadProfile.single("profileImage"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    
+    try {
+      // Get file path that can be accessed via URL
+      const fileUrl = getFileUrl(req.file.filename, "profile");
+      
+      // Update user profile with avatar URL
+      await storage.updateUser(req.user.id, {
+        avatar_url: fileUrl
+      });
+      
+      res.json({ 
+        url: fileUrl,
+        message: "Profile picture uploaded successfully" 
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Error uploading profile picture" });
+    }
+  });
+  
+  // POST /api/upload/post - Upload post media
+  app.post("/api/upload/post", uploadPostMedia.single("postMedia"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    
+    // Only admin can upload post media
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Only admin can upload post media" });
+    }
+    
+    try {
+      // Get file path that can be accessed via URL
+      const fileUrl = getFileUrl(req.file.filename, "post");
+      
+      res.json({ 
+        url: fileUrl,
+        message: "Post media uploaded successfully" 
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Error uploading post media" });
+    }
+  });
 
   // GET /api/posts - get all posts
   app.get("/api/posts", async (req, res) => {

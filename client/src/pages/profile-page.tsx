@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,7 +18,7 @@ import { User, Post } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import PostCard from "@/components/PostCard";
-import { Loader2, EditIcon, CheckIcon, BadgeCheckIcon, ShieldAlertIcon } from "lucide-react";
+import { Loader2, EditIcon, CheckIcon, BadgeCheckIcon, ShieldAlertIcon, Upload, Image } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, isAdmin } = useAuth();
@@ -33,6 +33,10 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [role, setRole] = useState("user");
+  
+  // File upload reference and state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   const { data: profileData, isLoading: isProfileLoading } = useQuery<User>({
     queryKey: [`/api/users/${user?.id}`],
@@ -103,6 +107,69 @@ export default function ProfilePage() {
       });
     },
   });
+  
+  // Profile image upload mutation
+  const uploadProfileImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("profileImage", file);
+      
+      const response = await fetch("/api/upload/profile", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAvatarUrl(data.url);
+      toast({
+        title: "Image uploaded",
+        description: "Profile picture has been uploaded successfully."
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload profile picture.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Handle file upload
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file",
+        description: "Please upload an image file (JPG, PNG, etc.).",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsUploading(true);
+    uploadProfileImageMutation.mutate(file);
+  };
   
   const handleSaveProfile = () => {
     if (!name.trim()) {
@@ -188,14 +255,38 @@ export default function ProfilePage() {
                         Profile Picture URL
                       </label>
                       <div className="flex flex-col gap-2 max-w-md">
-                        <Input
-                          id="avatar_url"
-                          value={avatarUrl}
-                          onChange={(e) => setAvatarUrl(e.target.value)}
-                          placeholder="https://example.com/avatar.jpg"
-                        />
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          Enter a URL to an image (file upload coming soon)
+                        <div className="grid grid-cols-1 gap-2">
+                          <input
+                            type="file"
+                            id="profile-upload"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                            ref={fileInputRef}
+                          />
+                          <Button 
+                            type="button"
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading || uploadProfileImageMutation.isPending}
+                          >
+                            {(isUploading || uploadProfileImageMutation.isPending) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Upload className="h-4 w-4" />
+                            )}
+                            Upload Profile Picture
+                          </Button>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Or enter a URL to an image:
+                          </p>
+                          <Input
+                            id="avatar_url"
+                            value={avatarUrl}
+                            onChange={(e) => setAvatarUrl(e.target.value)}
+                            placeholder="https://example.com/avatar.jpg"
+                          />
                         </div>
                         {avatarUrl && (
                           <div className="mt-2">

@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Premium content styles defined below */
+
 @layer base {
   * {
     @apply border-border;

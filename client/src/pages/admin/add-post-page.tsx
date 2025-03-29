@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -31,6 +31,7 @@ import {
   UploadIcon, 
   DollarSignIcon,
   Loader2,
+  LockIcon,
 } from "lucide-react";
 
 const postSchema = z.object({
@@ -45,6 +46,8 @@ export default function AddPostPage() {
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const [previewUrl, setPreviewUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  // fileInputRef is declared below
   
   // Redirect non-admin users
   useEffect(() => {
@@ -70,6 +73,50 @@ export default function AddPostPage() {
   useEffect(() => {
     setPreviewUrl(watchMediaUrl);
   }, [watchMediaUrl]);
+
+  // Handle file upload for posts
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    setIsUploading(true);
+    
+    try {
+      const response = await fetch("/api/upload/post", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+      
+      const data = await response.json();
+      const fileUrl = data.fileUrl;
+      
+      // Update the form with the uploaded file URL
+      form.setValue("media_url", fileUrl);
+      setPreviewUrl(fileUrl);
+      
+      toast({
+        title: "File uploaded",
+        description: "Your image has been uploaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
   
   const createPostMutation = useMutation({
     mutationFn: async (data: PostFormData) => {
@@ -165,16 +212,23 @@ export default function AddPostPage() {
                               type="button" 
                               variant="secondary"
                               className="rounded-l-none"
-                              onClick={() => {
-                                toast({
-                                  title: "Feature coming soon",
-                                  description: "Upload functionality will be available in a future update.",
-                                });
-                              }}
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isUploading}
                             >
-                              <UploadIcon className="h-4 w-4 mr-2" />
+                              {isUploading ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <UploadIcon className="h-4 w-4 mr-2" />
+                              )}
                               Upload
                             </Button>
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              className="hidden"
+                              accept="image/*"
+                              onChange={handleFileChange}
+                            />
                           </div>
                         </FormControl>
                         <FormDescription>
@@ -436,20 +490,4 @@ export default function AddPostPage() {
   );
 }
 
-function LockIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  );
-}
+// Using LockIcon imported from lucide-react
