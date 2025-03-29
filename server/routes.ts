@@ -5,7 +5,7 @@ import { setupAuth } from "./auth";
 import {
   insertPostSchema, insertCommentSchema, insertLikeSchema,
   insertMessageSchema, insertTipSchema, insertPaymentRequestSchema,
-  insertPurchasedContentSchema, insertUserSubscriptionSchema
+  insertPurchasedContentSchema, insertUserSubscriptionSchema, insertUserRequestSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -735,6 +735,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ purchased });
     } catch (err) {
       res.status(500).json({ message: "Error checking purchased content" });
+    }
+  });
+
+  // User Request Routes
+  
+  // POST /api/requests - create a new user request
+  app.post("/api/requests", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const requestData = insertUserRequestSchema.parse({
+        ...req.body,
+        user_id: req.user.id
+      });
+      
+      const userRequest = await storage.createUserRequest(requestData);
+      res.status(201).json(userRequest);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors });
+      }
+      res.status(500).json({ message: "Error creating request" });
+    }
+  });
+  
+  // GET /api/requests - get user's requests or all requests for admin
+  app.get("/api/requests", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role === "admin") {
+      // Admin can see all requests
+      const requests = await storage.getAllUserRequests();
+      res.json(requests);
+    } else {
+      // Users can only see their own requests
+      const requests = await storage.getUserRequestsByUserId(req.user.id);
+      res.json(requests);
+    }
+  });
+  
+  // GET /api/requests/public - get all public requests
+  app.get("/api/requests/public", async (req, res) => {
+    const requests = await storage.getPublicUserRequests();
+    res.json(requests);
+  });
+  
+  // GET /api/requests/:id - get a specific request
+  app.get("/api/requests/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const requestId = parseInt(req.params.id);
+    const userRequest = await storage.getUserRequestById(requestId);
+    
+    if (!userRequest) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+    
+    // Users can only view their own requests or public ones, admin can view all
+    if (userRequest.user_id !== req.user.id && req.user.role !== "admin" && !userRequest.is_public) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+    res.json(userRequest);
+  });
+  
+  // PUT /api/requests/:id - update a request (admin only or your own request)
+  app.put("/api/requests/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const requestId = parseInt(req.params.id);
+    const userRequest = await storage.getUserRequestById(requestId);
+    
+    if (!userRequest) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+    
+    // Only admin can update status and response
+    if (req.user.role !== "admin") {
+      if (userRequest.user_id !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      
+      // Regular users can only update title, description, and is_public
+      const allowedFields = ["title", "description", "is_public"];
+      Object.keys(req.body).forEach(key => {
+        if (!allowedFields.includes(key)) {
+          delete req.body[key];
+        }
+      });
+    }
+    
+    try {
+      const updatedRequest = await storage.updateUserRequest(requestId, req.body);
+      res.json(updatedRequest);
+    } catch (err) {
+      res.status(500).json({ message: "Error updating request" });
     }
   });
 

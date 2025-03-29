@@ -107,6 +107,19 @@ export const purchasedContent = pgTable("purchased_content", {
   created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
+// User requests schema
+export const userRequests = pgTable("user_requests", {
+  id: serial("id").primaryKey(),
+  user_id: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  status: text("status").default("pending").notNull(), // pending, in-progress, completed, rejected
+  admin_response: text("admin_response").default(""),
+  is_public: boolean("is_public").default(false).notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -175,6 +188,13 @@ export const insertPurchasedContentSchema = createInsertSchema(purchasedContent)
   amount: true,
 });
 
+export const insertUserRequestSchema = createInsertSchema(userRequests).pick({
+  user_id: true,
+  title: true,
+  description: true,
+  is_public: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -205,3 +225,6 @@ export type PaymentRequest = typeof paymentRequests.$inferSelect;
 
 export type InsertPurchasedContent = z.infer<typeof insertPurchasedContentSchema>;
 export type PurchasedContent = typeof purchasedContent.$inferSelect;
+
+export type InsertUserRequest = z.infer<typeof insertUserRequestSchema>;
+export type UserRequest = typeof userRequests.$inferSelect;

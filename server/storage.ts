@@ -1,11 +1,12 @@
 import {
   users, posts, comments, likes, subscriptionPlans, userSubscriptions,
-  messages, tips, paymentRequests, purchasedContent,
+  messages, tips, paymentRequests, purchasedContent, userRequests,
   type User, type InsertUser, type Post, type InsertPost,
   type Comment, type InsertComment, type Like, type InsertLike,
   type Message, type InsertMessage, type SubscriptionPlan, type InsertSubscriptionPlan,
   type UserSubscription, type InsertUserSubscription, type Tip, type InsertTip,
-  type PaymentRequest, type InsertPaymentRequest, type PurchasedContent, type InsertPurchasedContent
+  type PaymentRequest, type InsertPaymentRequest, type PurchasedContent, type InsertPurchasedContent,
+  type UserRequest, type InsertUserRequest
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -72,6 +73,14 @@ export interface IStorage {
   hasPurchasedContent(userId: number, postId?: number, messageId?: number): Promise<boolean>;
   createPurchasedContent(purchase: InsertPurchasedContent): Promise<PurchasedContent>;
   
+  // User request operations
+  createUserRequest(request: InsertUserRequest): Promise<UserRequest>;
+  getUserRequestsByUserId(userId: number): Promise<UserRequest[]>;
+  getAllUserRequests(): Promise<UserRequest[]>;
+  getUserRequestById(id: number): Promise<UserRequest | undefined>;
+  updateUserRequest(id: number, data: Partial<UserRequest>): Promise<UserRequest | undefined>;
+  getPublicUserRequests(): Promise<UserRequest[]>;
+  
   // Stats for admin dashboard
   getTotalUsers(): Promise<number>;
   getTotalPosts(): Promise<number>;
@@ -79,7 +88,7 @@ export interface IStorage {
   getTotalEarnings(): Promise<number>;
   
   // For authentication
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 export class MemStorage implements IStorage {
@@ -93,7 +102,8 @@ export class MemStorage implements IStorage {
   private tips: Map<number, Tip>;
   private paymentRequests: Map<number, PaymentRequest>;
   private purchasedContent: Map<number, PurchasedContent>;
-  sessionStore: session.SessionStore;
+  private userRequests: Map<number, UserRequest>;
+  sessionStore: any;
   
   currentUserId: number;
   currentPostId: number;
@@ -105,6 +115,7 @@ export class MemStorage implements IStorage {
   currentTipId: number;
   currentPaymentRequestId: number;
   currentPurchaseId: number;
+  currentUserRequestId: number;
 
   constructor() {
     this.users = new Map();
@@ -117,6 +128,7 @@ export class MemStorage implements IStorage {
     this.tips = new Map();
     this.paymentRequests = new Map();
     this.purchasedContent = new Map();
+    this.userRequests = new Map();
     
     this.currentUserId = 1;
     this.currentPostId = 1;
@@ -128,6 +140,7 @@ export class MemStorage implements IStorage {
     this.currentTipId = 1;
     this.currentPaymentRequestId = 1;
     this.currentPurchaseId = 1;
+    this.currentUserRequestId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // 24 hours
@@ -488,6 +501,58 @@ export class MemStorage implements IStorage {
     return newPurchase;
   }
   
+  // User request operations
+  async createUserRequest(request: InsertUserRequest): Promise<UserRequest> {
+    const id = this.currentUserRequestId++;
+    const now = new Date();
+    const newRequest: UserRequest = {
+      ...request,
+      id,
+      status: "pending",
+      admin_response: null,
+      is_public: request.is_public ?? false,
+      created_at: now,
+      updated_at: now
+    };
+    this.userRequests.set(id, newRequest);
+    return newRequest;
+  }
+  
+  async getUserRequestsByUserId(userId: number): Promise<UserRequest[]> {
+    return Array.from(this.userRequests.values())
+      .filter(request => request.user_id === userId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+  
+  async getAllUserRequests(): Promise<UserRequest[]> {
+    return Array.from(this.userRequests.values())
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+  
+  async getUserRequestById(id: number): Promise<UserRequest | undefined> {
+    return this.userRequests.get(id);
+  }
+  
+  async updateUserRequest(id: number, data: Partial<UserRequest>): Promise<UserRequest | undefined> {
+    const request = this.userRequests.get(id);
+    if (!request) return undefined;
+    
+    const now = new Date();
+    const updatedRequest = { 
+      ...request, 
+      ...data,
+      updated_at: now
+    };
+    this.userRequests.set(id, updatedRequest);
+    return updatedRequest;
+  }
+  
+  async getPublicUserRequests(): Promise<UserRequest[]> {
+    return Array.from(this.userRequests.values())
+      .filter(request => request.is_public)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+  
   // Stats for admin dashboard
   async getTotalUsers(): Promise<number> {
     return this.users.size;
@@ -530,6 +595,8 @@ export class MemStorage implements IStorage {
     
     return total;
   }
+  
+
 }
 
 export const storage = new MemStorage();
