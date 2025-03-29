@@ -33,7 +33,7 @@ export default function MobileHeader() {
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M16.5 7.5v.001"></path>
           </svg>
-          <span className="font-bold text-lg">CreatorConnect</span>
+          <span className="font-bold text-lg text-gray-900 dark:text-white">CreatorConnect</span>
         </div>
         <Button 
           variant="ghost" 

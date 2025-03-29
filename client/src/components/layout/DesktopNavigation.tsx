@@ -44,32 +44,32 @@ export default function DesktopNavigation() {
             <path d="M16.5 7.5v.001"></path>
           </svg>
           <Link href="/home">
-            <span className="font-bold text-xl cursor-pointer">CreatorConnect</span>
+            <span className="font-bold text-xl cursor-pointer text-gray-900 dark:text-white">CreatorConnect</span>
           </Link>
         </div>
         
         <div className="flex items-center space-x-6">
           <Link href="/home">
-            <a className="hover:text-primary-dark transition-colors">Home</a>
+            <a className="text-gray-800 dark:text-gray-200 hover:text-primary-dark dark:hover:text-primary transition-colors">Home</a>
           </Link>
           <Link href="/messages">
-            <a className="hover:text-primary-dark transition-colors">Messages</a>
+            <a className="text-gray-800 dark:text-gray-200 hover:text-primary-dark dark:hover:text-primary transition-colors">Messages</a>
           </Link>
           <Link href="/wallet">
-            <a className="hover:text-primary-dark transition-colors">Wallet</a>
+            <a className="text-gray-800 dark:text-gray-200 hover:text-primary-dark dark:hover:text-primary transition-colors">Wallet</a>
           </Link>
           <Link href="/profile">
-            <a className="hover:text-primary-dark transition-colors">Profile</a>
+            <a className="text-gray-800 dark:text-gray-200 hover:text-primary-dark dark:hover:text-primary transition-colors">Profile</a>
           </Link>
           
           {/* Admin-only navigation items */}
           {isAdmin && (
             <>
               <Link href="/admin/add-post">
-                <a className="hover:text-primary-dark transition-colors">Add Post</a>
+                <a className="text-gray-800 dark:text-gray-200 hover:text-primary-dark dark:hover:text-primary transition-colors">Add Post</a>
               </Link>
               <Link href="/admin/dashboard">
-                <a className="hover:text-primary-dark transition-colors">Dashboard</a>
+                <a className="text-gray-800 dark:text-gray-200 hover:text-primary-dark dark:hover:text-primary transition-colors">Dashboard</a>
               </Link>
             </>
           )}
