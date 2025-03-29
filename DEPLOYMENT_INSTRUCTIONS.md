@@ -48,9 +48,11 @@ If you still encounter 404 errors after deployment:
 
 1. When a user visits your deployed application, they will first see the loader animation.
 
-2. After 2 seconds, they will be automatically redirected to the main application.
+2. After 2 seconds, the loader will fade out and a welcome message will appear.
 
-3. This approach ensures users see something immediately when they visit your deployed site, even if the main application takes a moment to load.
+3. After a brief pause (1.5 seconds), users will be automatically redirected to the website's home page where they can sign up and read about the website.
+
+4. This approach ensures users see something immediately when they visit your deployed site, even if the main application takes a moment to load.
 
 ## Version Control
 
