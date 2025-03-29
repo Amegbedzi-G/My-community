@@ -8,8 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
   <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    
     /* Loader styles */
     .loader-container {
       display: flex;
@@ -94,10 +100,42 @@
       86%, to { stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -440; }
     }
     
-    /* Hide app content initially */
-    #root {
-      opacity: 0;
-      transition: opacity 1s ease-in;
+    /* Content area */
+    .content {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 500;
+      box-shadow: 0 4px 6px rgba(99, 102, 241, 0.25);
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 10px rgba(79, 70, 229, 0.3);
     }
   </style>
 </head>
@@ -112,25 +150,33 @@
     </svg>
   </div>
 
-  <!-- Root div for React app -->
-  <div id="root"></div>
+  <!-- Content that will show after loader -->
+  <div class="content" id="content" style="display:none;">
+    <h1>Welcome to CreatorConnect</h1>
+    <p>A modern, responsive personal content platform with Instagram-style feed, subscription plans, and monetization features.</p>
+    <a href="/client/" class="btn">Enter Application</a>
+  </div>
   
-  <!-- Script to handle the loader -->
+  <!-- Script to handle the loader and redirection -->
   <script>
     window.addEventListener('load', function() {
-      // When page and resources are loaded, show the main content
+      // When page is loaded, show content after delay
       setTimeout(function() {
         document.getElementById('loader').style.opacity = '0';
-        document.getElementById('root').style.opacity = '1';
+        document.getElementById('content').style.display = 'block';
         
         // After fade out completes, remove the loader from DOM
         setTimeout(function() {
           document.getElementById('loader').style.display = 'none';
+          
+          // Optional: auto-redirect after a delay
+          setTimeout(function() {
+            window.location.href = '/client/';
+          }, 1500); // Redirect after 1.5 seconds
+          
         }, 500);
       }, 2000); // Show loader for 2 seconds
     });
   </script>
-  
-  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
