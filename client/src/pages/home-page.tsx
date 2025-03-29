@@ -3,9 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getQueryFn, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { Post, User } from "@shared/schema";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import DesktopNavigation from "@/components/layout/DesktopNavigation";
-import MobileNavigation from "@/components/layout/MobileNavigation";
+import AppLayout from "@/components/layout/AppLayout";
 import PostCard from "@/components/PostCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -66,12 +64,8 @@ export default function HomePage() {
   const closeTopUpModal = () => setShowTopUpModal(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <ThemeToggle />
-      <DesktopNavigation />
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col md:flex-row container mx-auto max-w-6xl px-4 py-6 pb-20 md:pb-6">
+    <AppLayout>
+      <>
         {/* Feed */}
         <div className="md:w-8/12 md:pr-6">
           <h1 className="text-2xl font-bold mb-6">Latest Posts</h1>
@@ -210,17 +204,15 @@ export default function HomePage() {
             </div>
           )}
         </div>
-      </div>
-
-      <MobileNavigation />
-      
-      {/* Top Up Modal */}
-      {showTopUpModal && (
-        <TopUpModal 
-          isOpen={showTopUpModal} 
-          onClose={closeTopUpModal} 
-        />
-      )}
-    </div>
+        
+        {/* Top Up Modal */}
+        {showTopUpModal && (
+          <TopUpModal 
+            isOpen={showTopUpModal} 
+            onClose={closeTopUpModal} 
+          />
+        )}
+      </>
+    </AppLayout>
   );
 }
