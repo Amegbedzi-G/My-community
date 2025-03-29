@@ -1,0 +1,41 @@
+I want to create a responsive and modern frontend for my personal website, where I am the admin. The website should have a homepage that describes what users will see before they sign up. To access content, users must sign up and log in.  
+
+Once logged in, users can view my posts in an Instagram-style layout, displaying images, videos, and captions in a scrollable feed. They should be able to like/unlike posts, leave comments, and tip me. Some posts will be free, while premium content will be blurred until payment is made.  
+
+Users should have a wallet account that they can fund, top up, and use their balance to pay for premium content, messages, and subscriptions. The admin can set different subscription plans (weekly, monthly, yearly). Once users subscribe, they can message the admin for free.  
+
+Additionally, the admin can send pay-per-view (PPV) messages to users, which they must pay to unlock. Users should also be able to tip in chat, but only verified users can tip and pay to view locked content in chat.  
+
+The design should be clean, modern, and user-friendly, featuring a dark/light mode toggle and a fully responsive interface for both desktop and mobile. The desktop version should have a standard top navigation bar, while the mobile version should have a bottom navigation bar with different views for admins and creators:  
+
+- Admin Bottom Navigation: 🏠 Home, ➕ Add Post, 💬 Messages, 👤 Profile  
+- Creator Bottom Navigation: 🏠 Home, 💬 Messages, 👤 Profile, ⚙️ Settings  
+
+### Website Pages & Features:  
+- Landing Page (Homepage): Describes the platform, features, and why users should sign up. A sign-up button directs them to create an account.  
+- Sign-up/Login Page: Handles authentication (temporary using localStorage/sessionStorage).  
+- Main Homepage (After Login): Displays posts in an Instagram-style feed (premium content blurred until paid).  
+- Post Details Page: Users can like, comment, and tip.  
+- Profile Page: Displays user info, bio, and post history.  
+- Admin Dashboard: Manage posts, set content as free/paid, manage subscriptions, send PPV messages, and track total users, total earnings, total posts, and total subscribers.  
+- Wallet Page: Users can fund, top up, and manage their balance.  
+- Subscriptions Page: Users can choose a weekly, monthly, or yearly subscription.  
+- Settings Page (Creator Only): Modify account preferences.  
+- Messages Page:  
+  - Subscribed users can message the admin for free.  
+  - Non-subscribed users must pay to message the admin.  
+  - Admin can message anyone freely.  
+  - Admin can send pay-per-view (PPV) messages to users.  
+  - Users can tip in chat, but only verified users can tip and pay to view locked content in chat.  
+  - Users must be subscribed to send messages to the admin.  
+- Payment Modals: Used for wallet top-ups, paid messages, subscriptions, and unlocking premium content.  
+- Payment Requests & Admin Notification:  
+  - When a user requests payment, the admin should be notified.  
+  - The admin will provide the payment method based on user request (PayPal, CashApp, Apple Pay, Bank Transfer, or Crypto).  
+  - Once the user makes the payment and the admin verifies it, the admin can top up the user's wallet with the amount they paid.  
+- Admin Profile & Settings:  
+  - The admin should be able to edit their name and bio.  
+  - The admin profile should be viewable on mobile with full responsiveness.  
+  - A logout option should be available for the admin.  
+
+The frontend should be developed using HTML, CSS, and JavaScript, with localStorage or sessionStorage for temporary authentication handling. The UI should be built using modern CSS techniques like Flexbox and Grid, with smooth animations and transitions for an engaging experience. The code should be modular and well-organized, separating HTML structure, CSS styles, and JavaScript functionality to ensure scalability and maintainability.
