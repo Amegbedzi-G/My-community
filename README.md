@@ -1,63 +1,57 @@
-# Personal Content Platform
+# CreatorConnect
 
 A modern, responsive personal content platform with Instagram-style feed, subscription plans, and monetization features.
 
 ## Features
 
-- **User Authentication**: Secure login and registration system
-- **Content Management**: Create, edit, and delete posts with media attachments
-- **Premium Content**: Offer exclusive content through subscription plans
-- **Monetization**: Multiple revenue streams including subscriptions, tips, and pay-per-view content
-- **User Requests**: Allow users to submit special requests to the admin
-- **Admin Dashboard**: Track statistics and manage content
-- **Responsive Design**: Optimized for all devices from mobile to desktop
+- Authentication system with login/registration
+- Responsive mobile and desktop interface
+- Feed with premium content posting
+- Subscription plans for premium content
+- User wallet with payment and tip support
+- Direct messaging system with paid messaging
+- User request system
+- Admin dashboard and content management
+- Profile management with avatar uploading
 
-## Tech Stack
+## Technology Stack
 
-- **Frontend**: React, TailwindCSS, Shadcn UI components
-- **Backend**: Express.js
-- **Database**: In-memory storage (expandable to PostgreSQL)
-- **State Management**: TanStack Query (React Query)
-- **Authentication**: Express-session with Passport.js
-- **Routing**: Wouter for client-side routing
+- Frontend: React, TypeScript, TailwindCSS, Shadcn/UI
+- Backend: Node.js, Express
+- Storage: In-memory with Drizzle ORM
+- State Management: TanStack Query
 
 ## Getting Started
 
-1. Clone the repository:
+1. Clone this repository
    ```
-   git clone https://github.com/Amegbedzi-G/Personal-Community.git
+   git clone https://github.com/Amegbedzi-G/My-community.git
    ```
 
-2. Install dependencies:
+2. Install dependencies
    ```
    npm install
    ```
 
-3. Start the development server:
+3. Start the development server
    ```
    npm run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:5000`
+4. Open the application at http://localhost:5000
 
-## Project Structure
+## Usage
 
-- `client/`: Frontend React application
-  - `src/components/`: Reusable UI components
-  - `src/pages/`: Page components
-  - `src/hooks/`: Custom React hooks
-  - `src/lib/`: Utility functions and configurations
-- `server/`: Backend Express application
-  - `routes.ts`: API endpoints
-  - `storage.ts`: Data storage implementation
-  - `auth.ts`: Authentication logic
-- `shared/`: Code shared between client and server
-  - `schema.ts`: Database schema definitions
+- Register a new account or log in
+- Username "admin" automatically gets admin privileges
+- Explore the platform's features
+- Admin can post content, manage requests, and view stats
+- Users can subscribe to premium content, send messages, and make payments
 
-## Admin Access
+## Contributing
 
-The user with username "admin" automatically gets admin privileges in the system.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-[MIT](LICENSE)
+This project is licensed under the MIT License - see the LICENSE file for details.
