@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
-import { PaymentRequest, DashboardStats } from "@/lib/types";
+import { DashboardStats } from "@/lib/types";
+import { PaymentRequest } from "@shared/schema";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line,
@@ -25,6 +26,7 @@ import {
   XCircleIcon,
   ClockIcon,
   ArrowRightIcon,
+  LogOutIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
@@ -59,8 +61,16 @@ const subscribersData = [
 ];
 
 export default function DashboardPage() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, logoutMutation } = useAuth();
   const [, navigate] = useLocation();
+  
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        navigate("/auth");
+      }
+    });
+  };
   
   // Redirect non-admin users
   useEffect(() => {
@@ -138,14 +148,24 @@ export default function DashboardPage() {
               Manage your content, users, and earnings
             </p>
           </div>
-          <Button 
-            variant="default" 
-            onClick={() => navigate("/admin/add-post")}
-            className="hidden md:flex items-center"
-          >
-            <ImageIcon className="mr-2 h-4 w-4" />
-            Add New Post
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="default" 
+              onClick={() => navigate("/admin/add-post")}
+              className="hidden md:flex items-center"
+            >
+              <ImageIcon className="mr-2 h-4 w-4" />
+              Add New Post
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="flex items-center"
+            >
+              <LogOutIcon className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
         
         {/* Stats Cards */}
