@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="refresh" content="0;url=/home" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z'%3E%3C/path%3E%3Ccircle cx='12' cy='13' r='4'%3E%3C/circle%3E%3C/svg%3E" />
+  <title>CreatorConnect | Premium Content Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    
+    /* Loader styles */
+    .loader-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      background-color: #f8fafc;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .pl {
+      width: 6em;
+      height: 6em;
+    }
+
+    .pl__ring {
+      animation: ringA 2s linear infinite;
+    }
+
+    .pl__ring--a {
+      stroke: #f42f25;
+    }
+
+    .pl__ring--b {
+      animation-name: ringB;
+      stroke: #f49725;
+    }
+
+    .pl__ring--c {
+      animation-name: ringC;
+      stroke: #255ff4;
+    }
+
+    .pl__ring--d {
+      animation-name: ringD;
+      stroke: #f42582;
+    }
+
+    /* Animations */
+    @keyframes ringA {
+      from, 4% { stroke-dasharray: 0 660; stroke-width: 20; stroke-dashoffset: -330; }
+      12% { stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -335; }
+      32% { stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -595; }
+      40%, 54% { stroke-dasharray: 0 660; stroke-width: 20; stroke-dashoffset: -660; }
+      62% { stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -665; }
+      82% { stroke-dasharray: 60 600; stroke-width: 30; stroke-dashoffset: -925; }
+      90%, to { stroke-dasharray: 0 660; stroke-width: 20; stroke-dashoffset: -990; }
+    }
+
+    @keyframes ringB {
+      from, 12% { stroke-dasharray: 0 220; stroke-width: 20; stroke-dashoffset: -110; }
+      20% { stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -115; }
+      40% { stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -195; }
+      48%, 62% { stroke-dasharray: 0 220; stroke-width: 20; stroke-dashoffset: -220; }
+      70% { stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -225; }
+      90% { stroke-dasharray: 20 200; stroke-width: 30; stroke-dashoffset: -305; }
+      98%, to { stroke-dasharray: 0 220; stroke-width: 20; stroke-dashoffset: -330; }
+    }
+
+    @keyframes ringC {
+      from { stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: 0; }
+      8% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -5; }
+      28% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -175; }
+      36%, 58% { stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -220; }
+      66% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -225; }
+      86% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -395; }
+      94%, to { stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -440; }
+    }
+
+    @keyframes ringD {
+      from, 8% { stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: 0; }
+      16% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -5; }
+      36% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -175; }
+      44%, 50% { stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -220; }
+      58% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -225; }
+      78% { stroke-dasharray: 40 400; stroke-width: 30; stroke-dashoffset: -395; }
+      86%, to { stroke-dasharray: 0 440; stroke-width: 20; stroke-dashoffset: -440; }
+    }
+    
+    /* Content area */
+    .content {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 500;
+      box-shadow: 0 4px 6px rgba(99, 102, 241, 0.25);
+      transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 10px rgba(79, 70, 229, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader that shows first -->
+  <div class="loader-container" id="loader">
+    <svg class="pl" width="240" height="240" viewBox="0 0 240 240">
+      <circle class="pl__ring pl__ring--a" cx="120" cy="120" r="105" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 660" stroke-dashoffset="-330" stroke-linecap="round"></circle>
+      <circle class="pl__ring pl__ring--b" cx="120" cy="120" r="35" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 220" stroke-dashoffset="-110" stroke-linecap="round"></circle>
+      <circle class="pl__ring pl__ring--c" cx="85" cy="120" r="70" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 440" stroke-linecap="round"></circle>
+      <circle class="pl__ring pl__ring--d" cx="155" cy="120" r="70" fill="none" stroke="#000" stroke-width="20" stroke-dasharray="0 440" stroke-linecap="round"></circle>
+    </svg>
+  </div>
+
+  <!-- Content that will show after loader -->
+  <div class="content" id="content" style="display:none;">
+    <h1>Welcome to CreatorConnect</h1>
+    <p>A modern, responsive personal content platform with Instagram-style feed, subscription plans, and monetization features.</p>
+    <a href="/home" class="btn">Enter Application</a>
+  </div>
+  
+  <!-- Script to handle the loader and redirection -->
+  <script>
+    window.addEventListener('load', function() {
+      // When page is loaded, show content after delay
+      setTimeout(function() {
+        document.getElementById('loader').style.opacity = '0';
+        document.getElementById('content').style.display = 'block';
+        
+        // After fade out completes, remove the loader from DOM
+        setTimeout(function() {
+          document.getElementById('loader').style.display = 'none';
+          
+          // Optional: auto-redirect after a delay
+          setTimeout(function() {
+            window.location.href = '/home';
+          }, 1500); // Redirect after 1.5 seconds
+          
+        }, 500);
+      }, 2000); // Show loader for 2 seconds
+    });
+  </script>
+</body>
+</html>
